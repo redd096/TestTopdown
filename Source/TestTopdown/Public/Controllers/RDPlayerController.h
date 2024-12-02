@@ -37,16 +37,10 @@ protected:
 
 	//functions inputs
 	UFUNCTION(BlueprintCallable, Category = "RD | Inputs")
-	void MoveForward(const float InputValue) const;
-
+	void MovePawn(const FVector2D& InputValue);
+	
 	UFUNCTION(BlueprintCallable, Category = "RD | Inputs")
-	void MoveRight(const float InputValue) const;
-
-	UFUNCTION(BlueprintCallable, Category = "RD | Inputs")
-	void RotateYaw(const float InputValue, const bool UseSensitivity = false, const float SensitivityValue = 1);
-
-	UFUNCTION(BlueprintCallable, Category = "RD | Inputs")
-	void RotatePitch(const float InputValue, const bool UseSensitivity = false, const float SensitivityValue = 1);
+	void RotateController(const FVector2D& InputValue, const bool UseSensitivity = false, const float SensitivityValue = 1);
 
 public:
 	virtual void SetPawn(APawn* InPawn) override;
