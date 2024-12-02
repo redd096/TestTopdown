@@ -19,7 +19,7 @@ ARDPlayerCharacter::ARDPlayerCharacter()
 	CharMovement->RotationRate = FRotator(0.0f, 640.f, 0.0f);
 	CharMovement->bConstrainToPlane = true;
 	CharMovement->bSnapToPlaneAtStart = true;	
-	CharMovement->bRequestedMoveUseAcceleration = true;		// Use acceleration also for navmesh
+	CharMovement->GetNavMovementProperties()->bUseAccelerationForPaths = true;	// Use acceleration also for navmesh
 
 	// Create a camera boom...
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -28,6 +28,8 @@ ARDPlayerCharacter::ARDPlayerCharacter()
 	CameraBoom->TargetArmLength = 800.0f;
 	CameraBoom->SetRelativeRotation(FRotator(-50.0f, 0.0f, 0.0f));
 	CameraBoom->bDoCollisionTest = false;					// Don't want to pull camera in when it collides with level
+	CameraBoom->bEnableCameraLag = true;					// Camera Lag
+	CameraBoom->CameraLagSpeed = 3.0f;
 
 	// Create a camera...
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
