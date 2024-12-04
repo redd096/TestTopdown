@@ -35,4 +35,30 @@ ARDPlayerCharacter::ARDPlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	CameraComponent->bUsePawnControlRotation = false;		// Camera does not rotate relative to arm
+
+	//for an FPS
+	// /** Pawn mesh: 1st person view (arms; seen only by self) */
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
+	// USkeletalMeshComponent* Mesh1P;
+	//
+	// /** First person camera */
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	// UCameraComponent* FirstPersonCameraComponent;
+	
+	// // Set size for collision capsule
+	// GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
+	// 	
+	// // Create a CameraComponent	
+	// FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	// FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
+	// FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
+	// FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	//
+	// // Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
+	// Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
+	// Mesh1P->SetOnlyOwnerSee(true);
+	// Mesh1P->SetupAttachment(FirstPersonCameraComponent);
+	// Mesh1P->bCastDynamicShadow = false;
+	// Mesh1P->CastShadow = false;
+	// Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 }
