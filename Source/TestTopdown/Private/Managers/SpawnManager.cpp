@@ -56,7 +56,6 @@ void ASpawnManager::Tick(float DeltaTime)
 				//only spawners with minimum distance from players
 				const TArray<ASpawn*> PossibleSpawns = Spawns.FilterByPredicate([this](const ASpawn* Spawn)
 				{
-					PlayersInScene = GetPlayersInScene();
 					for (const auto PlayerInScene : PlayersInScene)
 					{
 						if (Spawn->GetDistanceTo(PlayerInScene) < MinDistanceSpawnFromPlayer)
@@ -91,13 +90,14 @@ void ASpawnManager::SpawnActor(const TArray<TSubclassOf<AActor>> InPossibleActor
 	Spawns[RandomSpawnIndex]->SpawnActor(RandomActor);
 }
 
-TArray<AActor*> ASpawnManager::GetPlayersInScene() const
+void ASpawnManager::UpdatePlayersInScene()
 {
 	UWorld* World = GetWorld();
 	if (World == nullptr)
-		return {};
-	
-	TArray<AActor*> PlayersInScene;
+		return;
+
+	//clear array
+	PlayersInScene.Empty();
 
 	//find local players
 	if (World->IsNetMode(NM_Standalone))
@@ -141,7 +141,6 @@ TArray<AActor*> ASpawnManager::GetPlayersInScene() const
 			}
 		}
 	}
-	return PlayersInScene;
 }
 
 void ASpawnManager::OnActorSpawn(const AActor* SpawnedActor)

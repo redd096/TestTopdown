@@ -70,7 +70,7 @@ protected:
 	void SpawnActor(const TArray<TSubclassOf<AActor>> InPossibleActors, const TArray<ASpawn*> InPossibleSpawns);
 	
 	UFUNCTION(BlueprintCallable, Category = "RD | SpawnManager")
-	TArray<AActor*> GetPlayersInScene() const;
+	void UpdatePlayersInScene();
 
 	UFUNCTION(BlueprintCallable, Category = "RD | SpawnManager")
 	void OnActorSpawn(const AActor* SpawnedActor);
