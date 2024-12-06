@@ -17,7 +17,8 @@ class TESTTOPDOWN_API ASpawn : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ASpawn();
-
+	
+	//other
 	UPROPERTY(BlueprintAssignable, Category = "RD | Spawn")
 	FOnSpawn OnSpawn;
 

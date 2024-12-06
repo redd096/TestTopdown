@@ -19,12 +19,13 @@ void ASpawnManager::BeginPlay()
 
 	//set default state
 	State = ESpawnManagerState::StartSpawn;
+	StartSpawnedActors = 0;
 
 	//register to spawners events
 	for (const auto Spawn : Spawns)
 	{
 		Spawn->OnSpawn.AddDynamic(this, &ASpawnManager::OnActorSpawn);
-		Spawn->OnDespawn.AddDynamic(this, &ASpawnManager::OnActorDespawn);
+		Spawn->OnDespawn.AddDynamic(this, &ASpawnManager::OnActorDespawnWithDelay);
 	}
 }
 
@@ -50,21 +51,36 @@ void ASpawnManager::Tick(float DeltaTime)
 	{
 		if (CheckDelay(DelayBetweenSpawns))
 		{
-			//only if still there isn't the number of actors in scene
-			if (SpawnedActors.Num() < ActorsToHaveInScene)
+			//update list of players
+			UpdatePlayersInScene();
+
+			//calculate actors near and far from players
+			const TArray<const AActor*> ActorsNearPlayers = SpawnedActors.FilterByPredicate([this](const AActor* ActorToCheck)
 			{
-				//only spawners with minimum distance from players
+				return GetDistanceToNearestPlayer(ActorToCheck) < MaxDistanceToEnsureSpawnedActorIsNearPlayers;
+			});
+			const int32 NumberOfActorsNearPlayers = ActorsNearPlayers.Num();
+			const int32 NumberOfActorsFarFromPlayers = SpawnedActors.Num() - NumberOfActorsNearPlayers;
+
+			//instantiate actors near players
+			if (NumberOfActorsNearPlayers < ActorsToHaveInSceneNearPlayers)
+			{
 				const TArray<ASpawn*> PossibleSpawns = Spawns.FilterByPredicate([this](const ASpawn* Spawn)
 				{
-					for (const auto PlayerInScene : PlayersInScene)
-					{
-						if (Spawn->GetDistanceTo(PlayerInScene) < MinDistanceSpawnFromPlayer)
-							return false;
-					}
-					return true;
+					const float Distance = GetDistanceToNearestPlayer(Spawn);
+					return Distance > MinDistanceSpawnFromPlayerToSpawn && Distance < MaxDistanceToEnsureSpawnedActorIsNearPlayers;
+				});				
+				SpawnActor(ActorsToSpawn, PossibleSpawns);				
+			}
+			//or actors far from players
+			else if (NumberOfActorsFarFromPlayers < ActorsToHaveInSceneFarFromPlayers)
+			{
+				const TArray<ASpawn*> PossibleSpawns = Spawns.FilterByPredicate([this](const ASpawn* Spawn)
+				{
+					return GetDistanceToNearestPlayer(Spawn) > MinDistanceToEnsureSpawnedActorIsFarFromPlayers;
 				});
 				SpawnActor(ActorsToSpawn, PossibleSpawns);				
-			}				
+			}
 		}
 	}
 }
@@ -90,6 +106,7 @@ void ASpawnManager::SpawnActor(const TArray<TSubclassOf<AActor>> InPossibleActor
 	Spawns[RandomSpawnIndex]->SpawnActor(RandomActor);
 }
 
+//find local or online players in scene
 void ASpawnManager::UpdatePlayersInScene()
 {
 	UWorld* World = GetWorld();
@@ -143,12 +160,51 @@ void ASpawnManager::UpdatePlayersInScene()
 	}
 }
 
+//check distance from players
+float ASpawnManager::GetDistanceToNearestPlayer(const AActor* InActorToCheck)
+{
+	float MinDistance = FLT_MAX;
+	for (const auto PlayerInScene : PlayersInScene)
+	{
+		const float NewDistance = InActorToCheck->GetDistanceTo(PlayerInScene);
+		if (NewDistance < MinDistance)
+		{
+			MinDistance = NewDistance;
+		}
+	}
+	
+	return MinDistance;
+}
+
+//add actor to the list
 void ASpawnManager::OnActorSpawn(const AActor* SpawnedActor)
 {
 	SpawnedActors.Add(SpawnedActor);
 }
 
+//wait few seconds, then remove actor from the list
+void ASpawnManager::OnActorDespawnWithDelay(const AActor* DespawnedActor)
+{
+	FTimerHandle TimerHandle;
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUObject(this, &ASpawnManager::OnActorDespawn, DespawnedActor);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDelegate, TimerBeforeRespawnDeadActor, false);
+}
+
+//remove actor from the list
 void ASpawnManager::OnActorDespawn(const AActor* DespawnedActor)
 {
-	SpawnedActors.Add(DespawnedActor);
+	SpawnedActors.Remove(DespawnedActor);
+}
+
+//get Spawns list
+TArray<ASpawn*> ASpawnManager::GetSpawns() const
+{
+	return Spawns;
+}
+
+//set Spawns list
+void ASpawnManager::SetSpawns(TArray<ASpawn*> InSpawns)
+{
+	Spawns = InSpawns;
 }
